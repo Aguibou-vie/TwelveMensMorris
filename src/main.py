@@ -1,13 +1,15 @@
 import tkinter as tk
 
-# Création de la fenêtre principale
+# Creation de la fenetre principalll
 root = tk.Tk()
 root.title("Twelve Men's Morris")
 root.geometry("800x800")
 
+
 # Canvas de dessin
 canvas = tk.Canvas(root, width=800, height=800, bg="beige")
 canvas.pack()
+
 
 # Coordonnées des carrés
 marges = [100, 200, 300]
@@ -15,7 +17,7 @@ taille = 800
 
 # Fonction pour dessiner le plateau
 def dessiner_plateau():
-    # 3 carrés imbriqués
+    # 3 carres imbriquees
     for marge in marges:
         canvas.create_rectangle(marge, marge, taille - marge, taille - marge, width=2)
 
@@ -25,6 +27,7 @@ def dessiner_plateau():
     canvas.create_line(centre, taille - marges[0], centre, taille - marges[1], width=2)
     canvas.create_line(marges[0], centre, marges[1], centre, width=2)
     canvas.create_line(taille - marges[0], centre, taille - marges[1], centre, width=2)
+
 
     # Positions des 24 points
     points = [
@@ -57,6 +60,21 @@ def dessiner_plateau():
         (5,13), (13,21),
         (7,15), (15,23)
     ]
+    
+    points = [
+    (100, 100), (400, 100), (700, 100),
+    (700, 400), (700, 700), (400, 700),
+    (100, 700), (100, 400),
+
+    (200, 200), (400, 200), (600, 200),
+    (600, 400), (600, 600), (400, 600),
+    (200, 600), (200, 400),
+
+    (300, 300), (400, 300), (500, 300),
+    (500, 400), (500, 500), (400, 500),
+    (300, 500), (300, 400)
+]
+
 
     for (i, j) in lignes:
         x1, y1 = points[i]
@@ -67,6 +85,21 @@ def dessiner_plateau():
     for (x, y) in points:
         r = 10
         canvas.create_oval(x - r, y - r, x + r, y + r, fill="black")
+        
+
+def clic_souris(event):
+    x, y = event.x, event.y
+    rayon = 10
+
+    for i, (px, py) in enumerate(points):
+        distance = ((px - x) ** 2 + (py - y) ** 2) ** 0.5
+        if distance <= rayon:
+            print(f"Tu as cliqué sur la position {i} aux coordonnées ({px}, {py})")
+            break
+
+canvas.bind("<Button-1>", clic_souris)
+
+
 
 # Appel de la fonction de dessin
 dessiner_plateau()
