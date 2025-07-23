@@ -18,6 +18,7 @@ points = [
 joueur_actuel = "noir"
 positions_occupees = {}
 mode_suppresion = False # si c True , on supprime le pion
+phase_mouvement = False # si true pasons a la phase deplacement
 
 # la liste des combinaisons ki font un moulin (3 pions alignés)
 moulins = [
@@ -83,7 +84,7 @@ def verifier_moulin(position, joueur):
 
 # ici c la fct ki s’active kan on clic sur un point
 def clic_souris(event):
-    global joueur_actuel, mode_suppresion
+    global joueur_actuel, mode_suppresion, phase_mouvement
     x, y = event.x, event.y
     rayon = 10
     
@@ -123,12 +124,23 @@ def clic_souris(event):
             if verifier_moulin(i, joueur_actuel):
                 print(f" MOULIN ! {joueur_actuel} peut retirer un pion adverse")
                 mode_suppresion = True # active mode suppresion
+                
+            #passer au deplacement if 24pions
+            if len(positions_occupees) == 24:
+                print("Phase deplacement active")
+                phase_mouvement = True
 
             # on change de joueur (genre c au tour de l'autre)
             joueur_actuel = "blanc" if joueur_actuel == "noir" else "noir"
             print(f"c au tour de {joueur_actuel}")
             break
 
+def pion_in_moulin(pos, joueur):
+    for moulin in moulins:
+        if pos in moulin:
+            if all(positions_occupees.get(p) == joueur for p in moulin):
+                return True
+    return False
 # on dessine le plateau et on lance le jeu
 dessiner_plateau()
 canvas.bind("<Button-1>", clic_souris)
