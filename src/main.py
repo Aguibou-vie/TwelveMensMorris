@@ -1,7 +1,29 @@
 # on importe tkinter (c la bibli pr dessiner le jeu)
 import tkinter as tk
 
+
+
+# le joueur ki commence (on met noir d’abord) et les cases dja joues
+joueur_actuel = "noir"
+positions_occupees = {}
+mode_suppresion = False # si c True , on supprime le pion
+phase_mouvement = False # si true pasons a la phase deplacement
+pion_selectionne= None  #pas de pion selectionner au debutç
+joueur_en_suppression = None  # le joueur ki a fait le moulin
+
+
 # les 24 ptites positions du plateau (c les ronds ou on clic)
+
+connexions = [
+    (0, 1), (1, 2), (2, 3), (3, 4), (4, 5), (5, 6), (6, 7), (7, 0),
+    (8, 9), (9,10), (10,11), (11,12), (12,13), (13,14), (14,15), (15,8),
+    (16,17), (17,18), (18,19), (19,20), (20,21), (21,22), (22,23), (23,16),
+    (1, 9), (9,17),
+    (3,11), (11,19),
+    (5,13), (13,21),
+    (7,15), (15,23)
+]
+
 points = [
     (100, 100), (400, 100), (700, 100),
     (700, 400), (700, 700), (400, 700),
@@ -84,7 +106,7 @@ def verifier_moulin(position, joueur):
 
 # ici c la fct ki s’active kan on clic sur un point
 def clic_souris(event):
-    global joueur_actuel, mode_suppresion, phase_mouvement
+    global joueur_actuel, mode_suppresion, phase_mouvement , pion_selectionne, joueur_en_suppression
     x, y = event.x, event.y
     rayon = 10
     
@@ -93,17 +115,64 @@ def clic_souris(event):
             distance= ((px - event.x) ** 2 + (py - event.y) ** 2) ** 0.5
             if distance <= 10:
                 #verifie si ya un pion 
-                if i in positions_occupees and positions_occupees[i] != joueur_actuel:
+                if i in positions_occupees and positions_occupees[i] != joueur_en_suppression:
                     #on elimine un. pion adverse 
                     canvas.create_oval(px-10 , py-10 , px + 10 , py +10, fill="beige")
                     # on l'elimine du dictionnaire 
                     del positions_occupees[i]
                     print(f"pion adverse retirer en {i}")
                     mode_suppresion = False #on retourne en mode normal
+                    joueur_actuel= "blanc" if joueur_en_suppression== "noir" else "noir"
+                    joueur_en_suppression= None
                     return
                 else:
                     print("Suppression IMPOSIBLE!")           
-        return     
+        return    
+    if phase_mouvement:
+        for i, (px,py) in enumerate(points):
+            distance= ((px - x) ** 2 ) ** 0.5
+            if distance <= rayon:
+                #si pas de pion selectionner , on selectionne un
+                if pion_selectionne is None:
+                    if i in positions_occupees and positions_occupees[i] == joueur_actuel:
+                        pion_selectionne = i
+                        print(f"pion du {joueur_actuel} selectioner en posstion {i}")
+                    else:
+                        print("tu peux selectionner que tes propre pion")
+                else:
+                    #verifie que la case est vide
+                    if i not in positions_occupees:
+                        #verifie sa voisinage du pion selectionner
+                        if (pion_selectionne, i) in connexions or (i, pion_selectionne) in connexions:
+                            #effancer ancien pions
+                            x1, y1 = points[pion_selectionne]
+                            canvas.create_oval(x1 - rayon, y1 - rayon, x1 + rayon, y1 + rayon, fill="lightgray")
+                            
+                            #designer nouveau pion
+                            x2, y2 = points[i]
+                            couleur= "black" if joueur_actuel== "noir" else "white" 
+                            canvas.create_oval(x2 - rayon , y2 - rayon , x2 + rayon , y2 + rayon , fill = couleur)
+                            #mettre a jour le dictionnaire 
+                            del positions_occupees[pion_selectionne]
+                            positions_occupees[i]= joueur_actuel
+                            print(f"pion deplace de {pion_selectionne}")
+                            
+                            pion_selectionne= None
+                            
+                            #verifie moulin
+                            if verifier_moulin(i, joueur_actuel):
+                                print(f"MOULIN ! {joueur_actuel} peut retirer un pion Adverse")
+                                mode_suppresion = True
+                                joueur_en_suppression = joueur_actuel
+                                return
+                            #changement de joueur 
+                            joueur_actuel= "blanl" if joueur_actuel == "noir" else "noir"
+                            print(f"c'est au tour du {joueur_actuel}")
+                        else:
+                            print("Cette case n'est pas voisin")
+                    else:
+                        print("Cette case est deja prise")
+                    return
     # on vérifie si le clic est sur un des 24 pts
     for i, (px, py) in enumerate(points):
         distance = ((px - x) ** 2 + (py - y) ** 2) ** 0.5
@@ -124,6 +193,7 @@ def clic_souris(event):
             if verifier_moulin(i, joueur_actuel):
                 print(f" MOULIN ! {joueur_actuel} peut retirer un pion adverse")
                 mode_suppresion = True # active mode suppresion
+                return
                 
             #passer au deplacement if 24pions
             if len(positions_occupees) == 24:
