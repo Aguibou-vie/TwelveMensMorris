@@ -13,6 +13,11 @@ joueur_en_suppression = None  # le joueur ki a fait le moulin
 suppression_effectuee = False
 
 
+pions_a_poser = {
+    "noir": 12,
+    "blanc": 12
+}
+
 # les 24 ptites positions du plateau (c les ronds ou on clic)
 
 connexions = [
@@ -112,7 +117,32 @@ def verifier_victoire():
             canvas.unbind("<Button-1>") #desactive les clics
             return True
     return False
-        
+
+def joueur_peut_sauter(joueur):
+    nb_pions = sum(1 for p in positions_occupees if positions_occupees[p]==joueur)
+    return nb_pions == 3
+
+#fonction qui verifie si un joueur peu bouger
+def joueur_peut_bouger(joueur):
+    #on parcour toute les list du pleateau
+    for pos in positions_occupees:
+        #si le pion de cette possition appatien au joueur 
+        if positions_occupees== joueur:
+            #on regarde toute les position posible
+            for a, b in connexions:
+                if a == pos and b not in positions_occupees:
+                    return True
+                if b == pos and a not in positions_occupees:
+                    return True
+    return False
+
+def pion_in_moulin(pos, joueur):
+    for moulin in moulins:
+        if pos in moulin:
+            if all(positions_occupees.get(p) == joueur for p in moulin):
+                return True
+    return False
+
 # ici c la fct ki s’active kan on clic sur un point
 def clic_souris(event):
     global joueur_actuel, mode_suppresion, phase_mouvement , pion_selectionne, joueur_en_suppression , suppression_effectuee
@@ -133,12 +163,12 @@ def clic_souris(event):
                     
                     if verifier_victoire():
                         return
-                    suppression_effectuee= True
-                    mode_suppresion = False #on retourne en mode normal
-                    joueur_actuel= "blanc" if joueur_en_suppression== "noir" else "noir"
-                    joueur_en_suppression= None
-                    suppression_effectuee= False
-                    return
+                    suppression_effectuee = True
+                    mode_suppresion = False
+                    joueur_actuel = "blanc" if joueur_en_suppression == "noir" else "noir"
+                    joueur_en_suppression = None
+                    return 
+
                 else:
                     print("Suppression IMPOSIBLE!")           
         return    
@@ -157,7 +187,8 @@ def clic_souris(event):
                     #verifie que la case est vide
                     if i not in positions_occupees:
                         #verifie sa voisinage du pion selectionner
-                        if (pion_selectionne, i) in connexions or (i, pion_selectionne) in connexions:
+                        if joueur_peut_sauter(joueur_actuel) or (pion_selectionne, i) in connexions or (i, pion_selectionne) in connexions:
+                            print("{joueur_actuel} en Phase de SAUT!")
                             #effancer ancien pions
                             x1, y1 = points[pion_selectionne]
                             canvas.create_oval(x1 - rayon, y1 - rayon, x1 + rayon, y1 + rayon, fill="lightgray")
@@ -205,6 +236,8 @@ def clic_souris(event):
             # on marque la position comme joue
             positions_occupees[i] = joueur_actuel
             print(f"{joueur_actuel} a mis un pion en {i}")
+            # on retire un pion dispo a ce joueur
+            pions_a_poser[joueur_actuel] -= 1 
 
             # on check si le joueur a fait un moulin 
             if verifier_moulin(i, joueur_actuel):
@@ -213,21 +246,23 @@ def clic_souris(event):
                 return
                 
             #passer au deplacement if 24pions
-            if len(positions_occupees) == 24:
-                print("Phase deplacement active")
-                phase_mouvement = True
+            if pions_a_poser["noir"] == 0 and pions_a_poser["blanc"] == 0:
+                if not joueur_peut_bouger("noir") and not joueur_peut_bouger("blanc"):
+                    print("Plus aucun mouvement possible... MATCH NUL !")
+                    canvas.unbind("<Button-1>")
+                else:
+                    print("Phase deplacement active")
+                    phase_mouvement = True
+
 
             # on change de joueur (genre c au tour de l'autre)
             joueur_actuel = "blanc" if joueur_actuel == "noir" else "noir"
             print(f"c au tour de {joueur_actuel}")
             break
+        
+    suppression_effectuee = False
 
-def pion_in_moulin(pos, joueur):
-    for moulin in moulins:
-        if pos in moulin:
-            if all(positions_occupees.get(p) == joueur for p in moulin):
-                return True
-    return False
+
 # on dessine le plateau et on lance le jeu
 dessiner_plateau()
 canvas.bind("<Button-1>", clic_souris)
