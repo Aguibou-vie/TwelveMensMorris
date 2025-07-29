@@ -150,28 +150,37 @@ def clic_souris(event):
     rayon = 10
     
     if mode_suppresion :
+        #verifie si un joueur peu suppr un pion 
+        pion_adverse = "noir" if joueur_en_suppression== "blanc" else "blanc"
+        #si tous les pions adverse sont dans un moulin
+        tous_dans_moulin= all (pion_in_moulin(pos, pion_adverse) for pos in positions_occupees if positions_occupees[pos]== pion_adverse)
         for i, (px,py) in enumerate(points):
             distance= ((px - event.x) ** 2 + (py - event.y) ** 2) ** 0.5
             if distance <= 10:
                 #verifie si ya un pion 
-                if not suppression_effectuee and i in positions_occupees and positions_occupees[i] != joueur_en_suppression:
-                    #on elimine un. pion adverse 
-                    canvas.create_oval(px-10 , py-10 , px + 10 , py +10, fill="beige")
-                    # on l'elimine du dictionnaire 
-                    del positions_occupees[i]
-                    print(f"pion adverse retirer en {i}")
-                    
-                    if verifier_victoire():
-                        return
-                    suppression_effectuee = True
-                    mode_suppresion = False
-                    joueur_actuel = "blanc" if joueur_en_suppression == "noir" else "noir"
-                    joueur_en_suppression = None
-                    return 
+                adversaire= "noir" if joueur_en_suppression =="blanc" else "blanc"
+                if not suppression_effectuee and i in positions_occupees and positions_occupees[i] == pion_adverse:
+                    if not pion_in_moulin(i, pion_adverse) or tous_dans_moulin:
+
+                        #on elimine un. pion adverse 
+                        canvas.create_oval(px-10 , py-10 , px + 10 , py +10, fill="beige")
+                        # on l'elimine du dictionnaire 
+                        del positions_occupees[i]
+                        print(f"pion adverse retirer en {i}")
+                        
+                        if verifier_victoire():
+                            return
+                        suppression_effectuee = True
+                        mode_suppresion = False
+                        joueur_actuel = "blanc" if joueur_en_suppression == "noir" else "noir"
+                        joueur_en_suppression = None
+                        return 
+                    else:
+                        print("tu peux pas retirer un pion dans un moulin sauf si y'a pas d'autre dispo")
 
                 else:
                     print("Suppression IMPOSIBLE!")           
-        return    
+                    return    
     if phase_mouvement:
         if not joueur_peut_bouger(joueur_actuel):
             print(f"{joueur_actuel} ne peut plus bouger ...Il perd la partie")
