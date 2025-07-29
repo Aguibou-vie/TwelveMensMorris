@@ -173,6 +173,12 @@ def clic_souris(event):
                     print("Suppression IMPOSIBLE!")           
         return    
     if phase_mouvement:
+        if not joueur_peut_bouger(joueur_actuel):
+            print(f"{joueur_actuel} ne peut plus bouger ...Il perd la partie")
+            gagnant = "blanc" if joueur_actuel== "noir" else "noir"
+            print(f"{gagnant.upper()} A GAGNÈ !")
+            canvas.unbind("<button-1>")
+            return
         for i, (px,py) in enumerate(points):
             distance= ((px - x) ** 2 ) ** 0.5
             if distance <= rayon:
@@ -247,12 +253,12 @@ def clic_souris(event):
                 
             #passer au deplacement if 24pions
             if pions_a_poser["noir"] == 0 and pions_a_poser["blanc"] == 0:
-                if not joueur_peut_bouger("noir") and not joueur_peut_bouger("blanc"):
+                """if not joueur_peut_bouger("noir") and not joueur_peut_bouger("blanc"):
                     print("Plus aucun mouvement possible... MATCH NUL !")
                     canvas.unbind("<Button-1>")
-                else:
-                    print("Phase deplacement active")
-                    phase_mouvement = True
+                else:"""
+                print("Phase deplacement active")
+                phase_mouvement = True
 
 
             # on change de joueur (genre c au tour de l'autre)
