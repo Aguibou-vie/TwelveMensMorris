@@ -12,13 +12,13 @@ pion_selectionne= None  #pas de pion selectionner au debutç
 joueur_en_suppression = None  # le joueur ki a fait le moulin
 suppression_effectuee = False
 
-
+#dictionnaire des pions
 pions_a_poser = {
     "noir": 12,
     "blanc": 12
 }
 
-# les 24 ptites positions du plateau (c les ronds ou on clic)
+# les 24 ptite positions du plateau (c les rond ou on clic)
 
 connexions = [
     (0, 1), (1, 2), (2, 3), (3, 4), (4, 5), (5, 6), (6, 7), (7, 0),
@@ -127,7 +127,7 @@ def joueur_peut_bouger(joueur):
     #on parcour toute les list du pleateau
     for pos in positions_occupees:
         #si le pion de cette possition appatien au joueur 
-        if positions_occupees== joueur:
+        if positions_occupees[pos]== joueur:
             #on regarde toute les position posible
             for a, b in connexions:
                 if a == pos and b not in positions_occupees:
@@ -158,25 +158,27 @@ def clic_souris(event):
             distance= ((px - event.x) ** 2 + (py - event.y) ** 2) ** 0.5
             if distance <= 10:
                 #verifie si ya un pion 
-                adversaire= "noir" if joueur_en_suppression =="blanc" else "blanc"
-                if not suppression_effectuee and i in positions_occupees and positions_occupees[i] == pion_adverse:
+                if (
+                    not suppression_effectuee
+                    and i in positions_occupees
+                    and positions_occupees[i] == pion_adverse
+                    ):
                     if not pion_in_moulin(i, pion_adverse) or tous_dans_moulin:
-
-                        #on elimine un. pion adverse 
-                        canvas.create_oval(px-10 , py-10 , px + 10 , py +10, fill="beige")
-                        # on l'elimine du dictionnaire 
+                        # on elimine un pion adverse
+                        canvas.create_oval(px - 10, py - 10, px + 10, py + 10, fill="beige")
                         del positions_occupees[i]
-                        print(f"pion adverse retirer en {i}")
-                        
+                        print(f"pion adverse retiré en {i}")
+
                         if verifier_victoire():
                             return
                         suppression_effectuee = True
                         mode_suppresion = False
                         joueur_actuel = "blanc" if joueur_en_suppression == "noir" else "noir"
                         joueur_en_suppression = None
-                        return 
+                        return
                     else:
                         print("tu peux pas retirer un pion dans un moulin sauf si y'a pas d'autre dispo")
+
 
                 else:
                     print("Suppression IMPOSIBLE!")           
@@ -282,3 +284,4 @@ def clic_souris(event):
 dessiner_plateau()
 canvas.bind("<Button-1>", clic_souris)
 root.mainloop()
+
