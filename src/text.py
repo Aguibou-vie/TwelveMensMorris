@@ -39,7 +39,7 @@ points = [
     (300, 500), (300, 400)
 ]
 
-# la liste des combinaisons ki font un moulin (3 pions alignés)
+# la liste des combinaisons ki font un moulin (3 pions alignes)
 moulins = [
     [0, 1, 2], [2, 3, 4], [4, 5, 6], [6, 7, 0],
     [8, 9, 10], [10, 11, 12], [12, 13, 14], [14, 15, 8],
@@ -86,27 +86,9 @@ def pion_in_moulin(pos, joueur):
                 return True
     return False
 
-# fct ki check les moulins
-
-def verifier_moulin(position, joueur):
-    for moulin in moulins:
-        if position in moulin:
-            if all(positions_occupees.get(p) == joueur for p in moulin):
-                return True
-    return False
-
-# fct ki check les moulins
-
-def verifier_moulin(position, joueur):
-    for moulin in moulins:
-        if position in moulin:
-            if all(positions_occupees.get(p) == joueur for p in moulin):
-                return True
-    return False
-
 # ici c la fct ki s’active kan on clic sur un point
 def clic_souris(event):
-    global joueur_actuel, mode_suppresion, pion_selectionne, joueur_en_suppression, suppression_effectuee, phase_mouvement
+    global joueur_actuel, mode_suppresion, pion_selectionne, joueur_en_suppression, suppression_effectuee
     x, y = event.x, event.y
     rayon = 10
 
@@ -157,10 +139,19 @@ def clic_souris(event):
                 return
             if pions_a_poser["noir"] == 0 and pions_a_poser["blanc"] == 0:
                 print("Phase de deplacement activee")
-                phase_mouvement = True
+                # phase_mouvement = True (pas encore gere ici)
             joueur_actuel = joueur_adverse(joueur_actuel)
             print(f"c au tour de {joueur_actuel}")
             break
+
+# fct ki check les moulins
+
+def verifier_moulin(position, joueur):
+    for moulin in moulins:
+        if position in moulin:
+            if all(positions_occupees.get(p) == joueur for p in moulin):
+                return True
+    return False
 
 # on dessine le plateau et on lance le jeu
 dessiner_plateau()
