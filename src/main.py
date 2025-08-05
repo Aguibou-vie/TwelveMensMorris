@@ -9,6 +9,7 @@ phase_mouvement = False # si true pasons a la phase deplacement
 pion_selectionne= None  #pas de pion selectionner au debutç
 joueur_en_suppression = None  # le joueur ki a fait le moulin
 suppression_effectuee = False
+phase_pose = True #on active la phase de pose
 
 #dictionnaire des pions
 pions_a_poser = {
@@ -106,7 +107,7 @@ def verifier_moulin(position, joueur):
 
 # ici c la fct ki s’active kan on clic sur un point
 def clic_souris(event):
-    global joueur_actuel, mode_suppresion, pion_selectionne, joueur_en_suppression, suppression_effectuee, phase_mouvement
+    global joueur_actuel, mode_suppresion, pion_selectionne, joueur_en_suppression, suppression_effectuee, phase_mouvement, phase_pose
     x, y = event.x, event.y
     rayon = 10
 
@@ -140,6 +141,10 @@ def clic_souris(event):
     for i, (px, py) in enumerate(points):
         distance = ((px - x) ** 2 + (py - y) ** 2) ** 0.5
         if distance <= rayon:
+            if not phase_pose :
+                print("Stoke epuise plus de pion a poser")
+                return
+            
             if i in positions_occupees:
                 print(f"c mort frérot, position {i} déjà prise par {positions_occupees[i]}")
                 return
@@ -157,7 +162,7 @@ def clic_souris(event):
                 return
             if pions_a_poser["noir"] == 0 and pions_a_poser["blanc"] == 0:
                 print("Phase de deplacement activee")
-                phase_mouvement = True
+                phase_pose= False
             joueur_actuel = joueur_adverse(joueur_actuel)
             print(f"c au tour de {joueur_actuel}")
             break
