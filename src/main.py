@@ -28,6 +28,38 @@ connexions = [
     (7,15), (15,23)
 ]
 
+def cases_voisines(pos1, pos2):
+    # ici on definit les cases qui sont reliees entre elles
+    # chaque numero correspond aux cases voisines valides sur le plateau
+    voisins = {
+        0: [1, 9],
+        1: [0, 2, 4],
+        2: [1, 14],
+        3: [4, 10],
+        4: [1, 3, 5, 7],
+        5: [4, 13],
+        6: [7, 11],
+        7: [4, 6, 8],
+        8: [7, 12],
+        9: [0, 10, 21],
+        10: [3, 9, 11, 18],
+        11: [6, 10, 15],
+        12: [8, 13, 17],
+        13: [5, 12, 14, 20],
+        14: [2, 13, 23],
+        15: [11, 16],
+        16: [15, 17, 19],
+        17: [12, 16],
+        18: [10, 19],
+        19: [16, 18, 20, 22],
+        20: [13, 19],
+        21: [9, 22],
+        22: [19, 21, 23],
+        23: [14, 22]
+    }
+    return pos2 in voisins.get(pos1, [])
+
+
 points = [
     (100, 100), (400, 100), (700, 100),
     (700, 400), (700, 700), (400, 700),
@@ -52,14 +84,53 @@ moulins = [
 def joueur_adverse(joueur):
     return "noir" if joueur == "blanc" else "blanc"
 
+
+
+def reset_game():
+    # remet tout a zero pr une nouvelle parti
+    global joueur_actuel, positions_occupees, mode_suppresion
+    global phase_mouvement, pion_selectionne, joueur_en_suppression
+    global suppression_effectuee, phase_pose, pions_a_poser
+
+    joueur_actuel = "noir"  # on recommence tjr par noir (comm avant)
+    positions_occupees = {}  # plateau vide
+    mode_suppresion = False
+    phase_mouvement = False
+    pion_selectionne = None
+    joueur_en_suppression = None
+    suppression_effectuee = False
+    phase_pose = True
+    pions_a_poser = {"noir": 12, "blanc": 12}
+
+    # on nettoie et on redessine
+    canvas.delete("all")
+    dessiner_plateau()
+
+    # on reactive le clic
+    canvas.bind("<Button-1>", clic_souris)
+
+    # on reactive le bouton rejouer (il reste dispo) et on log
+    print("nouvelle partie demarree")
+
 # on cree la fenetre du jeu
 root = tk.Tk()
 root.title("Twelve Men's Morris")
-root.geometry("800x800")
 
-# on cree le canvas pr dessiner (c genre une feuille blanche)
-canvas = tk.Canvas(root, width=800, height=800, bg="beige")
-canvas.pack()
+# taille de la fenetre
+root.geometry("800x860")
+canvas = tk.Canvas(root, width=800, height=760, bg="beige")
+canvas.pack(side="top")
+
+control_frame = tk.Frame(root)
+control_frame.pack(side="bottom", fill="x", pady=8)
+#rejouer
+btn_rejouer = tk.Button(control_frame, text="Rejouer", command=reset_game)
+btn_rejouer.pack(side="left", padx=6)
+
+
+# bouton quitter pour fermer le jeu
+btn_quitter = tk.Button(control_frame, text="Quitter", command=root.destroy)
+btn_quitter.pack(side="left", padx=6)
 
 # fonction pr dessiner le plateau (c les carre + lignes + points)
 def dessiner_plateau():
@@ -142,9 +213,48 @@ def clic_souris(event):
         distance = ((px - x) ** 2 + (py - y) ** 2) ** 0.5
         if distance <= rayon:
             if not phase_pose :
-                print("Stoke epuise plus de pion a poser")
+                if pion_selectionne is None:
+                    #choisit un pion a bouger
+                    if i in positions_occupees and positions_occupees[i] == joueur_actuel:
+                        pion_selectionne= i
+                        print(f"{joueur_actuel} a selectionne le pion en {i}")
+                    else:
+                        print("selection invalide, faut choisir un de tes pion")
+                else:
+                    #on a deja choisi donc on bouge
+                    if i not in positions_occupees:
+                        if cases_voisines(pion_selectionne, i):
+                        #on deplace le pion
+                            positions_occupees[i]= joueur_actuel
+                            del positions_occupees[pion_selectionne]
+                            
+                            #on efface l'ancien case
+                            old_x, old_y = points[pion_selectionne]
+                            canvas.create_oval(old_x - rayon, old_y - rayon, old_x + rayon, old_y + rayon, fill="lightgray", outline="black")
+                            #on designe le nouveau pion
+                            new_couleur = "black" if joueur_actuel == "noir" else "white"
+                            new_x, new_y =points[i]
+                            canvas.create_oval(new_x -rayon, new_y - rayon, new_x + rayon,new_y + rayon, fill=new_couleur )
+                            print(f"{joueur_actuel} a bouger son pion de {pion_selectionne} vers {i}")
+                            pion_selectionne = None
+                            
+                            #check moulin
+                            if verifier_moulin(i, joueur_actuel):
+                                print(f"MOULIN {joueur_actuel} PEUT RETIRER UN PION ADVERSE")
+                                mode_suppresion= True
+                                joueur_en_suppression = joueur_actuel
+                                suppression_effectuee = False
+                                return
+                            else:
+                                joueur_actuel = joueur_adverse(joueur_actuel)
+                                print(f"c'est au tour de {joueur_actuel}")
+                        else:
+                            print("deplacement invalide, tu dois choisir un case voisin")
+                            pion_selectionne = None
+                    else:
+                        print("case deja occupee!")
+                        pion_selectionne = None
                 return
-            
             if i in positions_occupees:
                 print(f"c mort frérot, position {i} déjà prise par {positions_occupees[i]}")
                 return
