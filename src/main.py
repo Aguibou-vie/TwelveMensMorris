@@ -108,6 +108,7 @@ def reset_game():
 
     # on reactive le clic
     canvas.bind("<Button-1>", clic_souris)
+    label_tour.config(text="Tour : noir")
 
     # on reactive le bouton rejouer (il reste dispo) et on log
     print("nouvelle partie demarree")
@@ -121,7 +122,7 @@ root.geometry("800x860")
 canvas = tk.Canvas(root, width=800, height=760, bg="beige")
 canvas.pack(side="top")
 
-control_frame = tk.Frame(root)
+control_frame = tk.Frame(root, bg="#e6e6e6")
 control_frame.pack(side="bottom", fill="x", pady=8)
 #rejouer
 btn_rejouer = tk.Button(control_frame, text="Rejouer", command=reset_game)
@@ -131,6 +132,9 @@ btn_rejouer.pack(side="left", padx=6)
 # bouton quitter pour fermer le jeu
 btn_quitter = tk.Button(control_frame, text="Quitter", command=root.destroy)
 btn_quitter.pack(side="left", padx=6)
+
+label_tour = tk.Label(control_frame, text="Tour : noir")
+label_tour.pack(side="left", padx=12)
 
 # fonction pr dessiner le plateau (c les carre + lignes + points)
 def dessiner_plateau():
@@ -175,6 +179,22 @@ def verifier_moulin(position, joueur):
             if all(positions_occupees.get(p) == joueur for p in moulin):
                 return True
     return False
+
+def verifier_victoire():
+    if phase_pose:
+        return False
+    for joueur in ["noir", "blanc"]:
+        pions_joueur = [pos for pos, j in positions_occupees.items() if j == joueur]
+        if len(pions_joueur) < 3:
+            print(f"Victoire de {joueur_adverse(joueur)} !")
+            label_tour.config(text=f"Gagnant : {joueur_adverse(joueur)}")
+            canvas.unbind("<Button-1>")
+            return
+        if not any(cases_voisines(pos, v) for pos in pions_joueur for v in range(24) if v not in positions_occupees):
+            print(f"Victoire de {joueur_adverse(joueur)} ! (bloqué)")
+            label_tour.config(text=f"Gagnant : {joueur_adverse(joueur)}")
+            canvas.unbind("<Button-1>")
+            return
 
 # ici c la fct ki s’active kan on clic sur un point
 def clic_souris(event):
@@ -223,7 +243,7 @@ def clic_souris(event):
                 else:
                     #on a deja choisi donc on bouge
                     if i not in positions_occupees:
-                        if cases_voisines(pion_selectionne, i):
+                        if len([p for p, j in positions_occupees.items() if j == joueur_actuel]) == 3 or cases_voisines(pion_selectionne, i):
                         #on deplace le pion
                             positions_occupees[i]= joueur_actuel
                             del positions_occupees[pion_selectionne]
@@ -247,7 +267,8 @@ def clic_souris(event):
                                 return
                             else:
                                 joueur_actuel = joueur_adverse(joueur_actuel)
-                                print(f"c'est au tour de {joueur_actuel}")
+                                label_tour.config(text=f"Tour : {joueur_actuel}")
+                                verifier_victoire()
                         else:
                             print("deplacement invalide, tu dois choisir un case voisin")
                             pion_selectionne = None
@@ -274,7 +295,8 @@ def clic_souris(event):
                 print("Phase de deplacement activee")
                 phase_pose= False
             joueur_actuel = joueur_adverse(joueur_actuel)
-            print(f"c au tour de {joueur_actuel}")
+            label_tour.config(text=f"Tour : {joueur_actuel}")
+            verifier_victoire()
             break
 
 # on dessine le plateau et on lance le jeu
