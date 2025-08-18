@@ -21,9 +21,12 @@ On gagne quand l’autre a plus que 2 pions ou il ne peut plus bouger.
 Cloner le repo :  
 ```bash
 git clone git@github.com:Aguibou-vie/TwelveMensMorris.git
-Lancer le jeu avec Python 3 :
-python3 main.py
-Auteur
-Aguibou Sow aka Sadiloop
+```
+## Lancer le jeu avec Python 3 :
+```bash
+python3 src/main.py
+```
+## Auteur
+- Aguibou Sow aka Sadiloop
 
 
