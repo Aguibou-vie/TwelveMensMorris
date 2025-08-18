@@ -1,16 +1,21 @@
 # on importe tkinter (c la bibli pr dessiner le jeu)
 import tkinter as tk
+import pygame # pour l'ajout de la musiqu
 
 # le joueur ki commence (on met noir d’abord) et les cases dja joues
 joueur_actuel = "noir"
 positions_occupees = {}
-mode_suppresion = False # si c True , on supprime le pion
-phase_mouvement = False # si true pasons a la phase deplacement
-pion_selectionne= None  #pas de pion selectionner au debutç
-joueur_en_suppression = None  # le joueur ki a fait le moulin
+mode_suppresion = False                      # si c True , on supprime le pion
+phase_mouvement = False                       # si true pasons a la phase deplacement
+pion_selectionne= None                         #pas de pion selectionner au debutç
+joueur_en_suppression = None                            # le joueur ki a fait le moulin
 suppression_effectuee = False
-phase_pose = True #on active la phase de pose
+phase_pose = True                                       #on active la phase de pose
 
+pygame.mixer.init()                                               #init pygame mixer
+pygame.mixer.music.load("assets/music/background-music.mp3")   #charger une musique
+pygame.mixer.music.set_volume(0.3)
+pygame.mixer.music.play(-1)    #jouer en boucl
 #dictionnaire des pions
 pions_a_poser = {
     "noir": 12,
