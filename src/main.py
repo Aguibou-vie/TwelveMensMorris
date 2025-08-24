@@ -243,10 +243,10 @@ def clic_souris(event):
                         )
                         return
                     else:
-                        print("tu peux pas retirer un pion dans un moulin sauf si y'a pas d'autre dispo")
+                        print("Impossible de retirer un pion dans un moulin sauf si tous les pions adverses y sont.")
                         return
                 else:
-                    print("Suppression IMPOSIBLE!")
+                    print("Suppression impossible!")
                     return
 
     for i, (px, py) in enumerate(points):
@@ -259,7 +259,7 @@ def clic_souris(event):
                         pion_selectionne= i
                         print(f"{joueur_actuel} a selectionne le pion en {i}")
                     else:
-                        print("selection invalide, faut choisir un de tes pion")
+                        print("Sélection invalide, choisissez l’un de vos pions.")
                 else:
                     #on a deja choisi donc on bouge
                     if i not in positions_occupees:
@@ -309,7 +309,7 @@ def clic_souris(event):
                 else:
                     mettre_a_jour_phase() # les 2 ont fini de poser
             if i in positions_occupees:
-                print(f"c mort frérot, position {i} déjà prise par {positions_occupees[i]}")
+                print(f"Position {i}déjà prise par un autre pion.")
                 return
             if pions_a_poser[joueur_actuel] <= 0 :
                 print(f"{joueur_actuel} n'a plus de pions a poser")
