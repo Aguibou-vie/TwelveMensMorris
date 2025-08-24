@@ -12,10 +12,16 @@ joueur_en_suppression = None                            # le joueur ki a fait le
 suppression_effectuee = False
 phase_pose = True                                       #on active la phase de pose
 
-pygame.mixer.init()                                               #init pygame mixer
-pygame.mixer.music.load("assets/music/background-music.mp3")   #charger une musique
-pygame.mixer.music.set_volume(0.2)
-pygame.mixer.music.play(-1)    #jouer en boucl
+
+
+try:
+    pygame.mixer.init()  # init pygame
+    pygame.mixer.music.load("assets/music/background-music.mp3") #charger la music
+    pygame.mixer.music.set_volume(0.2) 
+    pygame.mixer.music.play(-1)
+except Exception as e:
+    print("Musique désactivée :", e)
+
 #dictionnaire des pions
 pions_a_poser = {
     "noir": 12,
@@ -154,13 +160,18 @@ def nb_pions(joueur):
 
 def mettre_a_jour_phase():
     global phase_pose, phase_mouvement
+    # Quand les deux joueurs ont posé tous leurs pions,
+    # on passe à la phase de déplacement
     if pions_a_poser["noir"] == 0 and pions_a_poser["blanc"] == 0:
         phase_pose = False
         phase_mouvement = True
         print("Phase de déplacement activée")
         label_tour.config(
-            text=f"Tour : {joueur_actuel} (Phase: Mouvement) | Restants N/B : {pions_a_poser['noir']} / {pions_a_poser['blanc']}"
+            text=f"Tour : {joueur_actuel} (Phase: Mouvement) | "
+                f"Restants N/B : Noir :{pions_a_poser['noir']} /Blanc: {pions_a_poser['blanc']}"
         )
+
+
 
 
 def verifier_victoire():
@@ -227,8 +238,8 @@ def clic_souris(event):
                         joueur_en_suppression = None
                         label_tour.config(
                             text=f"Tour : {joueur_actuel} "
-                                 f"{'(Phase: Mouvement)' if not phase_pose else '(Phase: Pose)'} | "
-                                 f"Restants N/B : {pions_a_poser['noir']} / {pions_a_poser['blanc']}"
+                                f"{'(Phase: Mouvement)' if not phase_pose else '(Phase: Pose)'} | "
+                                f"Restants N/B : {pions_a_poser['noir']} / {pions_a_poser['blanc']}"
                         )
                         return
                     else:
